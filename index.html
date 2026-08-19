@@ -277,6 +277,86 @@
 
     .docs-main { min-width: 0; }
 
+    /* ── Introduction gallery ── */
+    .is-gallery .tabs,
+    .is-gallery .btn-animate { display: none; }
+    .is-gallery .detail-body { max-width: none; }
+    .is-gallery .stage {
+      min-height: 0;
+      display: block;
+      background: transparent;
+      box-shadow: none;
+      border-radius: 0;
+      overflow: visible;
+    }
+    .is-gallery .stage-slot {
+      display: block;
+      min-height: 0;
+      padding: 0;
+      width: 100%;
+    }
+    .gal-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .gal-filter {
+      height: 32px;
+      padding: 0 13px;
+      border: 0;
+      border-radius: 50px;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background var(--dur-ui) ease, color var(--dur-ui) ease;
+    }
+    .gal-filter:hover { color: var(--text); background: var(--nav-wash); }
+    .gal-filter.is-active { color: var(--text); background: var(--nav-wash-strong); }
+    .gallery {
+      column-count: 3;
+      column-gap: 16px;
+    }
+    .gal-card {
+      display: block;
+      break-inside: avoid;
+      margin: 0 0 16px;
+      border-radius: 16px;
+      background: var(--surface);
+      box-shadow: var(--material-shadow);
+      text-decoration: none;
+      color: inherit;
+      overflow: hidden;
+      transition: transform var(--dur) var(--ease);
+    }
+    .gal-card:hover { transform: translateY(-3px); }
+    .gal-stage {
+      margin: 12px;
+      height: 210px;
+      border-radius: 14px;
+      background: var(--stage);
+      box-shadow: inset 0 0 0 1px var(--stage-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .gal-stage .hb-packet {
+      transform: scale(0.72);
+      margin: 0;
+    }
+    .gal-meta { padding: 2px 16px 16px; }
+    .gal-title { font-size: 14px; font-weight: 500; letter-spacing: -0.01em; }
+    .gal-sub { margin-top: 4px; font-size: 12px; color: var(--text-muted); }
+    .gal-empty {
+      column-span: all;
+      color: var(--text-faint);
+      font-size: 13px;
+      padding: 24px 0;
+    }
+
     .detail-topbar {
       display: flex;
       gap: 8px;
@@ -694,6 +774,11 @@
       .docs-sidebar { display: none; }
       .detail-title { font-size: 30px; line-height: 36px; }
       .stage, .stage-slot { min-height: 360px; }
+      .is-gallery .stage, .is-gallery .stage-slot { min-height: 0; }
+      .gallery { column-count: 2; }
+    }
+    @media (max-width: 560px) {
+      .gallery { column-count: 1; }
     }
 
     /* ── Theme switch (Uiverse.io / RiccardoRapelli) ── */
@@ -1281,21 +1366,10 @@ export function Hongbao({
           {
             id: "intro",
             title: "Introduction",
-            subtitle: "先搭壳，组件后面再往里挂。",
-            css: "/* Lab shell — no component snippet yet. */\n",
-            react: "// Lab shell — no component snippet yet.\n",
-            render(stage) {
-              stage.innerHTML = `
-                <div class="stage-empty">
-                  <div class="stage-empty-plus" aria-hidden="true">
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                      <path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-                    </svg>
-                  </div>
-                  <div class="stage-empty-title">壳已经好了</div>
-                  <div class="stage-empty-sub">组件会挂在这个舞台上</div>
-                </div>`;
-            },
+            subtitle: "All components",
+            css: "/* Gallery page — open a component to copy CSS. */\n",
+            react: "// Gallery page — open a component to copy React.\n",
+            render: renderGallery,
           },
         ],
       },
@@ -1310,6 +1384,9 @@ export function Hongbao({
             css: HONGBAO_CSS,
             react: HONGBAO_REACT,
             render: mountHongbao,
+            thumb(el) {
+              el.innerHTML = `<div class="hb-packet hb-packet--stage">${packetMarkup}</div>`;
+            },
             animate() {
               if (typeof mountHongbao.play === "function") mountHongbao.play();
             },
@@ -1319,6 +1396,43 @@ export function Hongbao({
     ];
 
     const ITEMS = GROUPS.flatMap((g) => g.items.map((item) => ({ ...item, group: g.id })));
+    let galleryFilter = "all";
+
+    function catalogItems() {
+      return ITEMS.filter((item) => item.id !== "intro");
+    }
+
+    function renderGallery(stage) {
+      const groups = GROUPS.filter((g) => g.id !== "start");
+      const chips = [
+        `<button class="gal-filter${galleryFilter === "all" ? " is-active" : ""}" type="button" data-filter="all">All</button>`,
+        ...groups.map((g) => `
+          <button class="gal-filter${galleryFilter === g.id ? " is-active" : ""}" type="button" data-filter="${g.id}">${g.label}</button>`),
+      ];
+      const list = catalogItems().filter((item) => galleryFilter === "all" || item.group === galleryFilter);
+      stage.innerHTML = `
+        <div class="gal-filters">${chips.join("")}</div>
+        <div class="gallery">
+          ${list.length ? list.map((item) => `
+            <a class="gal-card" href="#${item.id}">
+              <div class="gal-stage" data-thumb="${item.id}"></div>
+              <div class="gal-meta">
+                <div class="gal-title">${item.title}</div>
+                <div class="gal-sub">${item.subtitle || ""}</div>
+              </div>
+            </a>`).join("") : `<div class="gal-empty">还没有组件</div>`}
+        </div>`;
+      list.forEach((item) => {
+        const el = stage.querySelector(`[data-thumb="${item.id}"]`);
+        if (el && typeof item.thumb === "function") item.thumb(el);
+      });
+      stage.querySelector(".gal-filters").addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-filter]");
+        if (!btn || btn.dataset.filter === galleryFilter) return;
+        galleryFilter = btn.dataset.filter;
+        renderGallery(stage);
+      });
+    }
 
     const $ = (id) => document.getElementById(id);
     const sidebar = $("sidebar");
@@ -1378,11 +1492,14 @@ export function Hongbao({
       if (location.hash.slice(1) !== item.id) {
         history.replaceState(null, "", "#" + item.id);
       }
+      const isGallery = item.id === "intro";
+      document.body.classList.toggle("is-gallery", isGallery);
       titleEl.textContent = item.title;
       subEl.textContent = item.subtitle || "";
       cssCode.textContent = item.css || "/* no CSS snippet */\n";
       reactCode.textContent = item.react || "// no React snippet\n";
       document.title = item.title + " — Lab";
+      if (isGallery) setTab("preview");
 
       if (typeof cleanup === "function") {
         try { cleanup(); } catch (_) {}
