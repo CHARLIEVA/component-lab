@@ -434,6 +434,148 @@
     }
     .notes[hidden] { display: none; }
 
+    /* ── Hongbao popup (from 知末 V1.2) ── */
+    .hb-preview {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      color: var(--text-subtle);
+      font-size: 12px;
+    }
+    .hb-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      display: none;
+      background: rgba(12, 10, 8, 0.22);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    html[data-theme="dark"] .hb-overlay { background: rgba(255, 255, 255, 0.06); }
+    .hb-overlay.is-open { display: block; }
+    .hb-burst { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+    .hb-wrap {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      width: min(300px, 86%);
+      transform: translate(-50%, -50%);
+      text-align: center;
+      animation: hb-pop 0.6s cubic-bezier(0.22, 1.45, 0.36, 1) both;
+    }
+    @keyframes hb-pop {
+      from { transform: translate(-50%, -18%) scale(0.72); opacity: 0; }
+      to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    }
+    .hb-close {
+      position: absolute;
+      top: -16px;
+      right: -10px;
+      z-index: 3;
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 50%;
+      color: #666;
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      font-size: 17px;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .hb-kicker {
+      margin: 0;
+      color: #1a120c;
+      font-size: 18px;
+      font-weight: 800;
+      text-shadow: 0 2px 10px rgba(255, 255, 255, 0.35);
+    }
+    html[data-theme="dark"] .hb-kicker {
+      color: #fff8ec;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+    }
+    .hb-sub { margin: 6px 0 16px; color: #8a7354; font-size: 12px; }
+    html[data-theme="dark"] .hb-sub { color: #e8d7b8; }
+    .hb-open {
+      height: 40px;
+      padding: 0 22px;
+      border: 0;
+      border-radius: 999px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      background: linear-gradient(135deg, #ff5a4a, #d51f2a);
+      box-shadow: 0 8px 18px rgba(213, 31, 42, 0.32);
+    }
+    .hb-packet {
+      position: relative;
+      width: 168px;
+      height: 240px;
+      margin: 0 auto 18px;
+      animation: hb-float 2.2s ease-in-out infinite;
+    }
+    .hb-packet--stage { margin-bottom: 0; }
+    @keyframes hb-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-7px); }
+    }
+    .hb-overlay.is-opening .hb-packet { animation: hb-shake 0.18s linear 2; }
+    @keyframes hb-shake {
+      0%, 100% { transform: rotate(0); }
+      25% { transform: rotate(-7deg); }
+      75% { transform: rotate(7deg); }
+    }
+    .hb-body {
+      position: absolute;
+      inset: 44px 0 0;
+      border-radius: 12px 12px 16px 16px;
+      background: linear-gradient(180deg, #e23b3b, #b51c22);
+      border: 1px solid #ffd18a;
+      box-shadow: 0 14px 28px rgba(140, 20, 24, 0.35);
+    }
+    .hb-flap {
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      top: 44px;
+      height: 61px;
+      background: linear-gradient(180deg, #ffd789, #e2a43a);
+      clip-path: polygon(0 0, 100% 0, 50% 100%);
+      z-index: 2;
+      transform-origin: top center;
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.18));
+    }
+    .hb-overlay.is-opening .hb-flap {
+      animation: hb-flap 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    @keyframes hb-flap {
+      to { transform: translateY(-8px) rotateX(80deg); opacity: 0.15; }
+    }
+    .hb-seal {
+      position: absolute;
+      left: 50%;
+      top: 46px;
+      z-index: 3;
+      width: 48px;
+      height: 48px;
+      margin-left: -24px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: #8a1a14;
+      background: radial-gradient(circle at 35% 30%, #ffe9b0, #e0b14a);
+      font-size: 19px;
+      font-weight: 800;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    }
+
     /* ── Command palette ── */
     .cmdk {
       position: fixed;
@@ -633,6 +775,117 @@
        render 负责把 DOM 挂到舞台上；返回函数则在切走时清理。
        有 animate(stage) 时，舞台左上角会出现 Animate 按钮。
        ============================================================ */
+
+    const packetMarkup = `
+      <div class="hb-flap"></div>
+      <div class="hb-body"><span class="hb-seal">拆</span></div>`;
+
+    function burstHongbao(canvas) {
+      const parent = canvas.parentElement.getBoundingClientRect();
+      canvas.width = parent.width;
+      canvas.height = parent.height;
+      const ctx = canvas.getContext("2d");
+      const colors = ["#ff5a4a", "#ffd789", "#fff3c4", "#e23b3b"];
+      const bits = Array.from({ length: 46 }, (_, i) => ({
+        x: canvas.width / 2,
+        y: canvas.height / 2 - 8,
+        vx: (Math.random() - 0.5) * 7.2,
+        vy: -Math.random() * 7 - 2,
+        g: 0.18,
+        s: 3 + Math.random() * 4,
+        a: 1,
+        c: colors[i % colors.length],
+      }));
+      let n = 0;
+      (function tick() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        bits.forEach((b) => {
+          b.vy += b.g;
+          b.x += b.vx;
+          b.y += b.vy;
+          b.a -= 0.02;
+          ctx.globalAlpha = Math.max(0, b.a);
+          ctx.fillStyle = b.c;
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, b.s, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        ctx.globalAlpha = 1;
+        if (++n < 48) requestAnimationFrame(tick);
+        else ctx.clearRect(0, 0, canvas.width, canvas.height);
+      })();
+    }
+
+    function mountHongbao(stage) {
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      stage.innerHTML = `
+        <button class="hb-preview" type="button" aria-label="打开红包弹窗">
+          <div class="hb-packet hb-packet--stage">${packetMarkup}</div>
+          <span>点击打开弹窗</span>
+        </button>`;
+
+      const overlay = document.createElement("div");
+      overlay.className = "hb-overlay";
+      overlay.id = "hb-overlay";
+      overlay.setAttribute("aria-hidden", "true");
+      overlay.innerHTML = `
+        <canvas class="hb-burst"></canvas>
+        <div class="hb-wrap" role="dialog" aria-modal="true" aria-labelledby="hb-kicker">
+          <button type="button" class="hb-close" aria-label="关闭">×</button>
+          <div class="hb-packet">${packetMarkup}</div>
+          <p class="hb-kicker" id="hb-kicker">恭喜获得年卡升级红包</p>
+          <p class="hb-sub">拆开查看限时升年优惠</p>
+          <button type="button" class="hb-open">拆开红包</button>
+        </div>`;
+      document.body.appendChild(overlay);
+
+      let opening = false;
+      let openTimer = 0;
+
+      function close() {
+        opening = false;
+        clearTimeout(openTimer);
+        overlay.classList.remove("is-open", "is-opening");
+        overlay.setAttribute("aria-hidden", "true");
+      }
+      function show() {
+        if (overlay.classList.contains("is-open")) return;
+        overlay.classList.add("is-open");
+        overlay.setAttribute("aria-hidden", "false");
+      }
+      function open() {
+        if (!overlay.classList.contains("is-open")) show();
+        if (opening) return;
+        opening = true;
+        overlay.classList.add("is-opening");
+        if (!reduce) burstHongbao(overlay.querySelector(".hb-burst"));
+        openTimer = setTimeout(close, reduce ? 80 : 720);
+      }
+      function onKey(e) {
+        if (e.key === "Escape" && overlay.classList.contains("is-open")) {
+          e.stopPropagation();
+          close();
+        }
+      }
+
+      stage.querySelector(".hb-preview").addEventListener("click", show);
+      overlay.querySelector(".hb-close").addEventListener("click", close);
+      overlay.querySelector(".hb-open").addEventListener("click", open);
+      overlay.querySelector(".hb-packet").addEventListener("click", open);
+      overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
+      document.addEventListener("keydown", onKey);
+
+      mountHongbao.open = show;
+      mountHongbao.play = open;
+      return () => {
+        close();
+        document.removeEventListener("keydown", onKey);
+        overlay.remove();
+        mountHongbao.open = null;
+        mountHongbao.play = null;
+      };
+    }
+
     const GROUPS = [
       {
         id: "start",
@@ -663,21 +916,13 @@
         label: "组件",
         items: [
           {
-            id: "slot-1",
-            title: "Empty slot",
-            subtitle: "下一个组件放这里",
-            notes: "占位。你给我组件后，我会替换这条的 render。",
-            render(stage) {
-              stage.innerHTML = `
-                <div class="stage-empty">
-                  <div class="stage-empty-plus" aria-hidden="true">
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                      <path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-                    </svg>
-                  </div>
-                  <div class="stage-empty-title">把组件放到这里</div>
-                  <div class="stage-empty-sub">丢过来之后挂到这个槽</div>
-                </div>`;
+            id: "hongbao",
+            title: "红包弹窗",
+            subtitle: "月升年拆红包 · 知末 V1.2",
+            notes: "从知末会员订阅页 V1.2 拆出的独立弹窗：全屏玻璃浮层 + 红身金口红包。点 Animate 或舞台预览打开；点红包或「拆开红包」走 shake → 揭盖 → 金色粒子。不再绑定支付流程。",
+            render: mountHongbao,
+            animate() {
+              if (typeof mountHongbao.play === "function") mountHongbao.play();
             },
           },
         ],
