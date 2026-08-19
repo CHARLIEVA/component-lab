@@ -696,6 +696,106 @@
       .stage, .stage-slot { min-height: 360px; }
     }
 
+    /* ── Theme switch (Uiverse.io / RiccardoRapelli) ── */
+    .theme-switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+      flex-shrink: 0;
+    }
+    .theme-switch #theme-input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .theme-switch .slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background-color: #2196f3;
+      transition: 0.4s;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .theme-switch .sun-moon {
+      position: absolute;
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: yellow;
+      transition: 0.4s;
+    }
+    .theme-switch #theme-input:checked + .slider { background-color: black; }
+    .theme-switch #theme-input:focus + .slider { box-shadow: 0 0 1px #2196f3; }
+    .theme-switch #theme-input:checked + .slider .sun-moon {
+      transform: translateX(26px);
+      background-color: white;
+      animation: rotate-center 0.6s ease-in-out both;
+    }
+    @keyframes rotate-center {
+      0% { transform: translateX(26px) rotate(0); }
+      100% { transform: translateX(26px) rotate(360deg); }
+    }
+    .theme-switch .moon-dot { opacity: 0; transition: 0.4s; fill: gray; }
+    .theme-switch #theme-input:checked + .slider .sun-moon .moon-dot { opacity: 1; }
+    .theme-switch .slider.round { border-radius: 34px; }
+    .theme-switch .slider.round .sun-moon { border-radius: 50%; }
+    #moon-dot-1 { left: 10px; top: 3px; position: absolute; width: 6px; height: 6px; z-index: 4; }
+    #moon-dot-2 { left: 2px; top: 10px; position: absolute; width: 10px; height: 10px; z-index: 4; }
+    #moon-dot-3 { left: 16px; top: 18px; position: absolute; width: 3px; height: 3px; z-index: 4; }
+    #light-ray-1 { left: -8px; top: -8px; position: absolute; width: 43px; height: 43px; z-index: -1; fill: white; opacity: 10%; }
+    #light-ray-2 { left: -50%; top: -50%; position: absolute; width: 55px; height: 55px; z-index: -1; fill: white; opacity: 10%; }
+    #light-ray-3 { left: -18px; top: -18px; position: absolute; width: 60px; height: 60px; z-index: -1; fill: white; opacity: 10%; }
+    .cloud-light {
+      position: absolute;
+      fill: #eee;
+      animation: cloud-move 6s infinite;
+    }
+    .cloud-dark {
+      position: absolute;
+      fill: #ccc;
+      animation: cloud-move 6s infinite 1s;
+    }
+    #cloud-1 { left: 30px; top: 15px; width: 40px; }
+    #cloud-2 { left: 44px; top: 10px; width: 20px; }
+    #cloud-3 { left: 18px; top: 24px; width: 30px; }
+    #cloud-4 { left: 36px; top: 18px; width: 40px; }
+    #cloud-5 { left: 48px; top: 14px; width: 20px; }
+    #cloud-6 { left: 22px; top: 26px; width: 30px; }
+    @keyframes cloud-move {
+      0% { transform: translateX(0); }
+      40% { transform: translateX(4px); }
+      80% { transform: translateX(-4px); }
+      100% { transform: translateX(0); }
+    }
+    .theme-switch .stars {
+      transform: translateY(-32px);
+      opacity: 0;
+      transition: 0.4s;
+    }
+    .theme-switch .star {
+      fill: white;
+      position: absolute;
+      transition: 0.4s;
+      animation: star-twinkle 2s infinite;
+    }
+    .theme-switch #theme-input:checked + .slider .stars {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    #star-1 { width: 20px; top: 2px; left: 3px; animation-delay: 0.3s; }
+    #star-2 { width: 6px; top: 16px; left: 3px; }
+    #star-3 { width: 12px; top: 20px; left: 10px; animation-delay: 0.6s; }
+    #star-4 { width: 18px; top: 0; left: 18px; animation-delay: 1.3s; }
+    @keyframes star-twinkle {
+      0% { transform: scale(1); }
+      40% { transform: scale(1.2); }
+      80% { transform: scale(0.8); }
+      100% { transform: scale(1); }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation: none !important;
@@ -726,15 +826,31 @@
             <span class="nav-search-label">搜索</span>
             <span class="nav-search-kbd" id="search-kbd">⌘K</span>
           </button>
-          <button class="icon-btn" id="theme-btn" type="button" aria-label="切换主题">
-            <svg id="icon-sun" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <circle cx="8" cy="8" r="2.4" stroke="currentColor" stroke-width="1.4"/>
-              <path d="M8 1.6v1.5M8 12.9v1.5M1.6 8h1.5M12.9 8h1.5M3.3 3.3l1.1 1.1M11.6 11.6l1.1 1.1M12.7 3.3l-1.1 1.1M4.4 11.6l-1.1 1.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-            </svg>
-            <svg id="icon-moon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" hidden>
-              <path d="M13.2 9.4A5.4 5.4 0 1 1 6.6 2.8 4.3 4.3 0 0 0 13.2 9.4Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
-            </svg>
-          </button>
+          <label class="theme-switch" title="切换日夜">
+            <input id="theme-input" type="checkbox" />
+            <div class="slider round">
+              <div class="sun-moon">
+                <svg id="moon-dot-1" class="moon-dot" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
+                <svg id="moon-dot-2" class="moon-dot" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
+                <svg id="moon-dot-3" class="moon-dot" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
+                <svg id="light-ray-1" class="light-ray" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
+                <svg id="light-ray-2" class="light-ray" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
+                <svg id="light-ray-3" class="light-ray" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
+              </div>
+              <svg id="cloud-1" class="cloud-dark" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
+              <svg id="cloud-2" class="cloud-dark" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
+              <svg id="cloud-3" class="cloud-dark" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
+              <svg id="cloud-4" class="cloud-light" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
+              <svg id="cloud-5" class="cloud-light" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
+              <svg id="cloud-6" class="cloud-light" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
+              <div class="stars">
+                <svg id="star-1" class="star" viewBox="0 0 20 20"><path d="M 0 10 C 10 10,10 10 ,0 10 C 10 10 , 10 10 , 10 20 C 10 10 , 10 10 , 20 10 C 10 10 , 10 10 , 10 0 C 10 10,10 10 ,0 10 Z"></path></svg>
+                <svg id="star-2" class="star" viewBox="0 0 20 20"><path d="M 0 10 C 10 10,10 10 ,0 10 C 10 10 , 10 10 , 10 20 C 10 10 , 10 10 , 20 10 C 10 10 , 10 10 , 10 0 C 10 10,10 10 ,0 10 Z"></path></svg>
+                <svg id="star-3" class="star" viewBox="0 0 20 20"><path d="M 0 10 C 10 10,10 10 ,0 10 C 10 10 , 10 10 , 10 20 C 10 10 , 10 10 , 20 10 C 10 10 , 10 10 , 10 0 C 10 10,10 10 ,0 10 Z"></path></svg>
+                <svg id="star-4" class="star" viewBox="0 0 20 20"><path d="M 0 10 C 10 10,10 10 ,0 10 C 10 10 , 10 10 , 10 20 C 10 10 , 10 10 , 20 10 C 10 10 , 10 10 , 10 0 C 10 10,10 10 ,0 10 Z"></path></svg>
+              </div>
+            </div>
+          </label>
           <button class="icon-btn nav-burger" id="burger" type="button" aria-label="菜单" aria-expanded="false">
             <span class="nav-burger-box">
               <span class="nav-burger-line nav-burger-line--top"></span>
@@ -1219,7 +1335,7 @@ export function Hongbao({
     const cmdkInput = $("cmdk-input");
     const cmdkList = $("cmdk-list");
     const burger = $("burger");
-    const themeBtn = $("theme-btn");
+    const themeInput = $("theme-input");
     const tabsEl = $("tabs");
     const indicator = $("tab-indicator");
 
@@ -1323,19 +1439,16 @@ export function Hongbao({
       return saved === "system" ? (systemDark() ? "dark" : "light") : saved;
     }
     function applyTheme() {
-      const saved = localStorage.getItem("lab-theme") || "system";
       const theme = resolvedTheme();
       document.documentElement.dataset.theme = theme;
       const dark = theme === "dark";
-      $("icon-sun").hidden = dark;
-      $("icon-moon").hidden = !dark;
-      themeBtn.title = saved === "system" ? "主题：跟随系统" : (dark ? "主题：深色" : "主题：浅色");
+      if (themeInput) {
+        themeInput.checked = dark;
+        themeInput.setAttribute("aria-label", dark ? "切换到浅色" : "切换到深色");
+      }
     }
-    function cycleTheme() {
-      const order = ["system", "light", "dark"];
-      const cur = localStorage.getItem("lab-theme") || "system";
-      const next = order[(order.indexOf(cur) + 1) % order.length];
-      localStorage.setItem("lab-theme", next);
+    function onThemeToggle() {
+      localStorage.setItem("lab-theme", themeInput.checked ? "dark" : "light");
       applyTheme();
     }
 
@@ -1385,7 +1498,7 @@ export function Hongbao({
     window.addEventListener("hashchange", () => mount(location.hash.slice(1)));
     prevBtn.addEventListener("click", () => move(-1));
     nextBtn.addEventListener("click", () => move(1));
-    themeBtn.addEventListener("click", cycleTheme);
+    themeInput.addEventListener("change", onThemeToggle);
     $("search-btn").addEventListener("click", openCmdk);
     sidebar.addEventListener("scroll", updateSidebarFade);
     window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyTheme);
