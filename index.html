@@ -348,7 +348,6 @@
       width: calc(var(--gal-w) * var(--gal-s));
       height: calc(var(--gal-h) * var(--gal-s));
       overflow: hidden;
-      pointer-events: none;
       flex: none;
     }
     .gal-float-inner {
@@ -367,7 +366,12 @@
       max-width: none;
       height: 280px;
     }
-    .gal-meta { padding: 2px 16px 16px; }
+    .gal-meta {
+      display: block;
+      padding: 2px 16px 16px;
+      text-decoration: none;
+      color: inherit;
+    }
     .gal-title { font-size: 14px; font-weight: 500; letter-spacing: -0.01em; }
     .gal-sub { margin-top: 4px; font-size: 12px; color: var(--text-muted); }
     .gal-empty {
@@ -1956,7 +1960,7 @@ export function AskCard() {
             react: HONGBAO_REACT,
             render: mountHongbao,
             thumb(el) {
-              el.innerHTML = `<div class="hb-packet hb-packet--stage">${packetMarkup}</div>`;
+              return mountHongbao(el);
             },
             animate() {
               if (typeof mountHongbao.play === "function") mountHongbao.play();
@@ -1976,17 +1980,8 @@ export function AskCard() {
             react: COMPARE_REACT,
             render: mountCompareCard,
             thumb(el) {
-              el.innerHTML = `
-                <div class="gal-float" style="--gal-w:380px;--gal-h:280px;--gal-s:.62">
-                <div class="gal-float-inner"><article class="cmp-enhance">
-                  <div class="cmp-enhance-head"><div><h3>对照一下</h3><p>拖动看前后变化</p></div>
-                  <button class="cmp-enhance-cta" type="button">开始试试</button></div>
-                  <div class="cmp-split" style="--split:58%">
-                    <img src="${MOCK_BEFORE}" alt="">
-                    <img class="cmp-split-after" src="${MOCK_AFTER}" alt="">
-                    <span class="cmp-split-line"></span><span class="cmp-split-handle">↔</span>
-                  </div>
-                </article></div></div>`;
+              el.innerHTML = `<div class="gal-float" style="--gal-w:380px;--gal-h:280px;--gal-s:.62"><div class="gal-float-inner" data-live></div></div>`;
+              return mountCompareCard(el.querySelector("[data-live]"));
             },
             animate() {
               if (typeof mountCompareCard.play === "function") mountCompareCard.play();
@@ -2000,15 +1995,8 @@ export function AskCard() {
             react: ASK_REACT,
             render: mountAskCard,
             thumb(el) {
-              el.innerHTML = `
-                <div class="gal-float" style="--gal-w:280px;--gal-h:280px;--gal-s:.62">
-                <div class="gal-float-inner"><article class="cmp-ask">
-                  <div class="cmp-ask-idle">
-                    <div class="cmp-ask-head"><div><h3>问一问</h3><p class="cmp-ask-sub">先看一条回答</p></div>
-                    <span class="cmp-ask-go">→</span></div>
-                    <div class="cmp-ask-answer"><i>▣</i><p>今天风不大，傍晚前都还亮。<span>备忘 · 5 月 12 日</span></p></div>
-                  </div>
-                </article></div></div>`;
+              el.innerHTML = `<div class="gal-float" style="--gal-w:280px;--gal-h:280px;--gal-s:.62"><div class="gal-float-inner" data-live></div></div>`;
+              return mountAskCard(el.querySelector("[data-live]"));
             },
             animate() {
               if (typeof mountAskCard.play === "function") mountAskCard.play();
@@ -2053,28 +2041,41 @@ export function AskCard() {
           <button class="gal-filter${galleryFilter === g.id ? " is-active" : ""}" type="button" data-filter="${g.id}">${g.label}</button>`),
       ];
       const list = catalogItems().filter((item) => galleryFilter === "all" || item.group === galleryFilter);
+      if (typeof renderGallery.cleanup === "function") {
+        renderGallery.cleanup();
+        renderGallery.cleanup = null;
+      }
       stage.innerHTML = `
         <div class="gal-filters">${chips.join("")}</div>
         <div class="gallery">
           ${list.length ? list.map((item) => `
-            <a class="gal-card" href="#${item.id}">
+            <article class="gal-card">
               <div class="gal-stage" data-thumb="${item.id}"></div>
-              <div class="gal-meta">
+              <a class="gal-meta" href="#${item.id}">
                 <div class="gal-title">${item.title}</div>
                 <div class="gal-sub">${item.subtitle || ""}</div>
-              </div>
-            </a>`).join("") : `<div class="gal-empty">还没有组件</div>`}
+              </a>
+            </article>`).join("") : `<div class="gal-empty">还没有组件</div>`}
         </div>`;
+      const stops = [];
       list.forEach((item) => {
         const el = stage.querySelector(`[data-thumb="${item.id}"]`);
-        if (el && typeof item.thumb === "function") item.thumb(el);
+        if (el && typeof item.thumb === "function") {
+          const stop = item.thumb(el);
+          if (typeof stop === "function") stops.push(stop);
+        }
       });
+      renderGallery.cleanup = () => stops.forEach((fn) => fn());
       stage.querySelector(".gal-filters").addEventListener("click", (e) => {
         const btn = e.target.closest("[data-filter]");
         if (!btn || btn.dataset.filter === galleryFilter) return;
         galleryFilter = btn.dataset.filter;
         renderGallery(stage);
       });
+      return () => {
+        if (typeof renderGallery.cleanup === "function") renderGallery.cleanup();
+        renderGallery.cleanup = null;
+      };
     }
 
     const $ = (id) => document.getElementById(id);
