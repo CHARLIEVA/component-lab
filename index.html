@@ -546,7 +546,7 @@
     }
     .code-copy:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
 
-    /* ── Hongbao popup (from 知末 V1.2) ── */
+    /* ── Hongbao popup ── */
     .hb-preview {
       display: flex;
       flex-direction: column;
@@ -1076,8 +1076,8 @@
         <div class="hb-wrap" role="dialog" aria-modal="true" aria-labelledby="hb-kicker">
           <button type="button" class="hb-close" aria-label="关闭">×</button>
           <div class="hb-packet">${packetMarkup}</div>
-          <p class="hb-kicker" id="hb-kicker">恭喜获得年卡升级红包</p>
-          <p class="hb-sub">拆开查看限时升年优惠</p>
+          <p class="hb-kicker" id="hb-kicker">恭喜获得红包</p>
+          <p class="hb-sub">拆开看看里面是什么</p>
           <button type="button" class="hb-open">拆开红包</button>
         </div>`;
       document.body.appendChild(overlay);
@@ -1302,8 +1302,8 @@ function burst(canvas) {
 }
 
 export function Hongbao({
-  kicker = "恭喜获得年卡升级红包",
-  sub = "拆开查看限时升年优惠",
+  kicker = "恭喜获得红包",
+  sub = "拆开看看里面是什么",
   onOpened,
 }) {
   const [open, setOpen] = useState(false);
@@ -1380,7 +1380,7 @@ export function Hongbao({
           {
             id: "hongbao",
             title: "红包弹窗",
-            subtitle: "月升年拆红包 · 知末 V1.2",
+            subtitle: "拆开红包弹窗",
             css: HONGBAO_CSS,
             react: HONGBAO_REACT,
             render: mountHongbao,
