@@ -1,0 +1,19 @@
+name: Deploy HK
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  hk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.HK_DEPLOY_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H 8.217.240.164 >> ~/.ssh/known_hosts
+      - name: Upload to HK nginx
+        run: scp -o StrictHostKeyChecking=yes index.html root@8.217.240.164:/var/www/uich/index.html

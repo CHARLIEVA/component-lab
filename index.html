@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN" data-theme="system">
+<html lang="zh-CN" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -1732,12 +1732,8 @@ export function ThemeSwitch({ checked, onChange }) {
     }
 
     /* theme */
-    function systemDark() {
-      return window.matchMedia("(prefers-color-scheme: dark)").matches;
-    }
     function resolvedTheme() {
-      const saved = localStorage.getItem("lab-theme") || "system";
-      return saved === "system" ? (systemDark() ? "dark" : "light") : saved;
+      return localStorage.getItem("lab-theme") === "dark" ? "dark" : "light";
     }
     function applyTheme() {
       const theme = resolvedTheme();
@@ -1802,7 +1798,7 @@ export function ThemeSwitch({ checked, onChange }) {
     themeInput.addEventListener("change", onThemeToggle);
     $("search-btn").addEventListener("click", openCmdk);
     sidebar.addEventListener("scroll", updateSidebarFade);
-    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyTheme);
+
 
     tabsEl.addEventListener("click", (e) => {
       const btn = e.target.closest(".tab");
