@@ -1086,12 +1086,12 @@
     <header class="site-nav">
       <div class="site-nav-inner">
         <div class="site-nav-left">
-          <a class="brand" href="#intro">
+          <a class="brand" href="#all">
             <span class="brand-mark" aria-hidden="true"></span>
             <span class="brand-word">Lab <span>/ shell</span></span>
           </a>
           <nav class="site-nav-menu">
-            <a class="nav-pill is-active" href="#intro">组件</a>
+            <a class="nav-pill is-active" href="#all">组件</a>
           </nav>
         </div>
         <div class="site-nav-right">
@@ -1152,7 +1152,7 @@
 
         <header class="detail-head">
           <div class="detail-titles">
-            <h1 class="detail-title" id="title">Introduction</h1>
+            <h1 class="detail-title" id="title">ALL</h1>
             <p class="detail-sub" id="subtitle"></p>
           </div>
           <div class="tabs" id="tabs">
@@ -1911,13 +1911,13 @@ export function AskCard() {
 
     const GROUPS = [
       {
-        id: "start",
-        label: "开始",
+        id: "browse",
+        label: "全部",
         items: [
           {
-            id: "intro",
-            title: "Introduction",
-            subtitle: "All components",
+            id: "all",
+            title: "ALL",
+            subtitle: "全部组件",
             css: "/* Gallery page — open a component to copy CSS. */\n",
             react: "// Gallery page — open a component to copy React.\n",
             render: renderGallery,
@@ -1925,8 +1925,8 @@ export function AskCard() {
         ],
       },
       {
-        id: "components",
-        label: "组件",
+        id: "popup",
+        label: "弹窗",
         items: [
           {
             id: "hongbao",
@@ -1942,20 +1942,12 @@ export function AskCard() {
               if (typeof mountHongbao.play === "function") mountHongbao.play();
             },
           },
-          {
-            id: "theme-switch",
-            title: "Day night switch",
-            subtitle: "Sun, clouds, moon and stars",
-            css: THEME_SWITCH_CSS,
-            react: THEME_SWITCH_REACT,
-            render: mountThemeSwitch,
-            thumb(el) {
-              el.innerHTML = themeSwitchMarkup("thumb-theme-input");
-            },
-            animate() {
-              if (typeof mountThemeSwitch.play === "function") mountThemeSwitch.play();
-            },
-          },
+        ],
+      },
+      {
+        id: "card",
+        label: "卡片",
+        items: [
           {
             id: "compare-card",
             title: "对照卡片",
@@ -2002,17 +1994,37 @@ export function AskCard() {
           },
         ],
       },
+      {
+        id: "button",
+        label: "按钮",
+        items: [
+          {
+            id: "theme-switch",
+            title: "日夜模式切换switch",
+            subtitle: "太阳、云、月亮和星星",
+            css: THEME_SWITCH_CSS,
+            react: THEME_SWITCH_REACT,
+            render: mountThemeSwitch,
+            thumb(el) {
+              el.innerHTML = themeSwitchMarkup("thumb-theme-input");
+            },
+            animate() {
+              if (typeof mountThemeSwitch.play === "function") mountThemeSwitch.play();
+            },
+          },
+        ],
+      },
     ];
 
     const ITEMS = GROUPS.flatMap((g) => g.items.map((item) => ({ ...item, group: g.id })));
     let galleryFilter = "all";
 
     function catalogItems() {
-      return ITEMS.filter((item) => item.id !== "intro");
+      return ITEMS.filter((item) => item.id !== "all");
     }
 
     function renderGallery(stage) {
-      const groups = GROUPS.filter((g) => g.id !== "start");
+      const groups = GROUPS.filter((g) => g.id !== "browse");
       const chips = [
         `<button class="gal-filter${galleryFilter === "all" ? " is-active" : ""}" type="button" data-filter="all">All</button>`,
         ...groups.map((g) => `
@@ -2101,7 +2113,7 @@ export function AskCard() {
       if (location.hash.slice(1) !== item.id) {
         history.replaceState(null, "", "#" + item.id);
       }
-      const isGallery = item.id === "intro";
+      const isGallery = item.id === "all";
       document.body.classList.toggle("is-gallery", isGallery);
       titleEl.textContent = item.title;
       subEl.textContent = item.subtitle || "";
@@ -2294,7 +2306,8 @@ export function AskCard() {
     $("search-kbd").textContent = /Mac|iPhone|iPad/.test(navigator.platform) ? "⌘K" : "Ctrl K";
 
     applyTheme();
-    mount(location.hash.slice(1) || "intro");
+    const startId = location.hash.slice(1);
+    mount(startId === "intro" || !startId ? "all" : startId);
     requestAnimationFrame(() => setTab("preview"));
     window.addEventListener("resize", () => setTab(currentTab));
   </script>
