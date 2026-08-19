@@ -7,7 +7,7 @@
   <title>Lab — Component shell</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
       color-scheme: light;
@@ -41,6 +41,7 @@
       --dur-ui: 150ms;
       --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
         Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
       --radius-stage: 24px;
       --radius-card: 12px;
     }
@@ -425,14 +426,45 @@
     .btn-animate.is-visible { display: inline-flex; align-items: center; }
     .btn-animate:hover { background: var(--chip-hover); }
 
-    .notes {
-      margin: 0;
-      padding: 20px 4px 0;
-      font-size: 15px;
-      line-height: 24px;
-      color: var(--text-muted);
+    .code {
+      position: relative;
+      min-height: 460px;
+      border-radius: var(--radius-stage);
+      background: #141414;
+      color: #e8e8e8;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+      overflow: hidden;
     }
-    .notes[hidden] { display: none; }
+    .code-scroll {
+      margin: 0;
+      max-height: 640px;
+      overflow: auto;
+      padding: 22px 24px 28px;
+    }
+    .code-scroll code {
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      line-height: 1.65;
+      white-space: pre;
+      font-weight: 400;
+    }
+    .code-copy {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 2;
+      height: 32px;
+      padding: 0 12px;
+      border: 0;
+      border-radius: 50px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #d0d0d0;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background var(--dur-ui) ease, color var(--dur-ui) ease;
+    }
+    .code-copy:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
 
     /* ── Hongbao popup (from 知末 V1.2) ── */
     .hb-preview {
@@ -733,7 +765,8 @@
           <div class="tabs" id="tabs">
             <span class="tabs-indicator" id="tab-indicator"></span>
             <button class="tab is-active" type="button" data-tab="preview">Preview</button>
-            <button class="tab" type="button" data-tab="notes">Notes</button>
+            <button class="tab" type="button" data-tab="css">CSS</button>
+            <button class="tab" type="button" data-tab="react">React</button>
           </div>
         </header>
 
@@ -744,8 +777,17 @@
               <div class="stage-slot" id="slot"></div>
             </div>
           </section>
-          <section class="panel" data-panel="notes">
-            <div class="notes" id="notes"></div>
+          <section class="panel" data-panel="css">
+            <div class="code">
+              <button class="code-copy" type="button" data-copy="css">Copy</button>
+              <pre class="code-scroll"><code id="css-code"></code></pre>
+            </div>
+          </section>
+          <section class="panel" data-panel="react">
+            <div class="code">
+              <button class="code-copy" type="button" data-copy="react">Copy</button>
+              <pre class="code-scroll"><code id="react-code"></code></pre>
+            </div>
           </section>
         </div>
       </div>
@@ -771,8 +813,8 @@
   <script>
     /* ============================================================
        CATALOG
-       后面加组件只改这里：push 一条，写 render(stage)。
-       render 负责把 DOM 挂到舞台上；返回函数则在切走时清理。
+       后面加组件只改这里：push 一条，写 render / css / react。
+       render 挂到 Preview 舞台；css / react 填到对应 tab。
        有 animate(stage) 时，舞台左上角会出现 Animate 按钮。
        ============================================================ */
 
@@ -886,6 +928,235 @@
       };
     }
 
+    const HONGBAO_CSS = `/* Lab — Hongbao popup */
+
+:root {
+  --hb-dur: 400ms;
+  --hb-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hb-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: none;
+  background: rgba(12, 10, 8, 0.22);
+  backdrop-filter: blur(6px);
+}
+.hb-overlay.is-open { display: block; }
+
+.hb-burst {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.hb-wrap {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: min(300px, 86%);
+  transform: translate(-50%, -50%);
+  text-align: center;
+  animation: hb-pop 0.6s cubic-bezier(0.22, 1.45, 0.36, 1) both;
+}
+
+@keyframes hb-pop {
+  from { transform: translate(-50%, -18%) scale(0.72); opacity: 0; }
+  to   { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+.hb-close {
+  position: absolute;
+  top: -16px;
+  right: -10px;
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.88);
+  color: #666;
+  cursor: pointer;
+}
+
+.hb-packet {
+  position: relative;
+  width: 168px;
+  height: 240px;
+  margin: 0 auto 18px;
+  animation: hb-float 2.2s ease-in-out infinite;
+}
+@keyframes hb-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+.hb-overlay.is-opening .hb-packet {
+  animation: hb-shake 0.18s linear 2;
+}
+@keyframes hb-shake {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-7deg); }
+  75% { transform: rotate(7deg); }
+}
+
+.hb-body {
+  position: absolute;
+  inset: 44px 0 0;
+  border-radius: 12px 12px 16px 16px;
+  background: linear-gradient(180deg, #e23b3b, #b51c22);
+  border: 1px solid #ffd18a;
+  box-shadow: 0 14px 28px rgba(140, 20, 24, 0.35);
+}
+.hb-flap {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: 44px;
+  height: 61px;
+  background: linear-gradient(180deg, #ffd789, #e2a43a);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  z-index: 2;
+  transform-origin: top center;
+}
+.hb-overlay.is-opening .hb-flap {
+  animation: hb-flap var(--hb-dur) var(--hb-ease) forwards;
+}
+@keyframes hb-flap {
+  to { transform: translateY(-8px) rotateX(80deg); opacity: 0.15; }
+}
+.hb-seal {
+  position: absolute;
+  left: 50%;
+  top: 46px;
+  z-index: 3;
+  width: 48px;
+  height: 48px;
+  margin-left: -24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #8a1a14;
+  background: radial-gradient(circle at 35% 30%, #ffe9b0, #e0b14a);
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.hb-kicker { margin: 0; font-size: 18px; font-weight: 800; }
+.hb-sub { margin: 6px 0 16px; font-size: 12px; opacity: 0.75; }
+.hb-open {
+  height: 40px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+  background: linear-gradient(135deg, #ff5a4a, #d51f2a);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hb-packet, .hb-wrap, .hb-overlay.is-opening .hb-flap { animation: none !important; }
+}
+`;
+
+    const HONGBAO_REACT = `// Lab — Hongbao popup (React, self-contained)
+import { useEffect, useRef, useState } from "react";
+
+const CSS_ID = "lab-hongbao";
+const CSS = "/* paste the CSS tab into this string */";
+
+function burst(canvas) {
+  const box = canvas.parentElement.getBoundingClientRect();
+  canvas.width = box.width;
+  canvas.height = box.height;
+  const ctx = canvas.getContext("2d");
+  const colors = ["#ff5a4a", "#ffd789", "#fff3c4", "#e23b3b"];
+  const bits = Array.from({ length: 46 }, (_, i) => ({
+    x: canvas.width / 2,
+    y: canvas.height / 2 - 8,
+    vx: (Math.random() - 0.5) * 7.2,
+    vy: -Math.random() * 7 - 2,
+    g: 0.18,
+    s: 3 + Math.random() * 4,
+    a: 1,
+    c: colors[i % colors.length],
+  }));
+  let n = 0;
+  (function tick() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    bits.forEach((b) => {
+      b.vy += b.g; b.x += b.vx; b.y += b.vy; b.a -= 0.02;
+      ctx.globalAlpha = Math.max(0, b.a);
+      ctx.fillStyle = b.c;
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, b.s, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+    if (++n < 48) requestAnimationFrame(tick);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  })();
+}
+
+export function Hongbao({
+  kicker = "恭喜获得年卡升级红包",
+  sub = "拆开查看限时升年优惠",
+  onOpened,
+}) {
+  const [open, setOpen] = useState(false);
+  const [opening, setOpening] = useState(false);
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    if (typeof document === "undefined" || document.getElementById(CSS_ID)) return;
+    const style = document.createElement("style");
+    style.id = CSS_ID;
+    style.textContent = CSS;
+    document.head.appendChild(style);
+  }, []);
+
+  function play() {
+    if (opening) return;
+    setOpen(true);
+    setOpening(true);
+    requestAnimationFrame(() => {
+      if (canvasRef.current) burst(canvasRef.current);
+    });
+    window.setTimeout(() => {
+      setOpening(false);
+      setOpen(false);
+      onOpened?.();
+    }, 720);
+  }
+
+  return (
+    <>
+      <button type="button" onClick={() => setOpen(true)}>打开红包</button>
+      {open && (
+        <div
+          className={"hb-overlay is-open" + (opening ? " is-opening" : "")}
+          onClick={(e) => e.target === e.currentTarget && setOpen(false)}
+        >
+          <canvas className="hb-burst" ref={canvasRef} />
+          <div className="hb-wrap" role="dialog" aria-modal="true">
+            <button type="button" className="hb-close" onClick={() => setOpen(false)}>×</button>
+            <div className="hb-packet" onClick={play}>
+              <div className="hb-flap" />
+              <div className="hb-body"><span className="hb-seal">拆</span></div>
+            </div>
+            <p className="hb-kicker">{kicker}</p>
+            <p className="hb-sub">{sub}</p>
+            <button type="button" className="hb-open" onClick={play}>拆开红包</button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+`;
+
     const GROUPS = [
       {
         id: "start",
@@ -895,7 +1166,8 @@
             id: "intro",
             title: "Introduction",
             subtitle: "先搭壳，组件后面再往里挂。",
-            notes: "这是空壳。侧栏、顶栏、舞台、主题、搜索都已经通了。你丢组件过来时，把它登记进 CATALOG 即可。",
+            css: "/* Lab shell — no component snippet yet. */\n",
+            react: "// Lab shell — no component snippet yet.\n",
             render(stage) {
               stage.innerHTML = `
                 <div class="stage-empty">
@@ -919,7 +1191,8 @@
             id: "hongbao",
             title: "红包弹窗",
             subtitle: "月升年拆红包 · 知末 V1.2",
-            notes: "从知末会员订阅页 V1.2 拆出的独立弹窗：全屏玻璃浮层 + 红身金口红包。点 Animate 或舞台预览打开；点红包或「拆开红包」走 shake → 揭盖 → 金色粒子。不再绑定支付流程。",
+            css: HONGBAO_CSS,
+            react: HONGBAO_REACT,
             render: mountHongbao,
             animate() {
               if (typeof mountHongbao.play === "function") mountHongbao.play();
@@ -937,7 +1210,8 @@
     const slot = $("slot");
     const titleEl = $("title");
     const subEl = $("subtitle");
-    const notesEl = $("notes");
+    const cssCode = $("css-code");
+    const reactCode = $("react-code");
     const animateBtn = $("animate-btn");
     const prevBtn = $("prev-btn");
     const nextBtn = $("next-btn");
@@ -990,7 +1264,8 @@
       }
       titleEl.textContent = item.title;
       subEl.textContent = item.subtitle || "";
-      notesEl.textContent = item.notes || "还没有备注。";
+      cssCode.textContent = item.css || "/* no CSS snippet */\n";
+      reactCode.textContent = item.react || "// no React snippet\n";
       document.title = item.title + " — Lab";
 
       if (typeof cleanup === "function") {
@@ -1118,6 +1393,20 @@
     tabsEl.addEventListener("click", (e) => {
       const btn = e.target.closest(".tab");
       if (btn) setTab(btn.dataset.tab);
+    });
+
+    document.querySelectorAll(".code-copy").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const source = btn.dataset.copy === "react" ? reactCode : cssCode;
+        try {
+          await navigator.clipboard.writeText(source.textContent || "");
+          const prev = btn.textContent;
+          btn.textContent = "Copied";
+          setTimeout(() => { btn.textContent = prev; }, 1200);
+        } catch (_) {
+          btn.textContent = "Failed";
+        }
+      });
     });
 
     burger.addEventListener("click", () => {
