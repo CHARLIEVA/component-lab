@@ -345,15 +345,27 @@
     }
     .gal-stage .hb-packet { transform: scale(0.72); margin: 0; }
     .gal-float {
-      width: var(--gal-w, 168px);
-      height: var(--gal-h, 140px);
+      width: calc(var(--gal-w) * var(--gal-s));
+      height: calc(var(--gal-h) * var(--gal-s));
       overflow: hidden;
       pointer-events: none;
       flex: none;
     }
-    .gal-float > * {
-      transform: scale(var(--gal-s, 0.5));
+    .gal-float-inner {
+      width: var(--gal-w);
+      height: var(--gal-h);
+      transform: scale(var(--gal-s));
       transform-origin: top left;
+    }
+    .gal-float-inner .cmp-enhance {
+      width: 380px;
+      max-width: none;
+      height: 280px;
+    }
+    .gal-float-inner .cmp-ask {
+      width: 280px;
+      max-width: none;
+      height: 280px;
     }
     .gal-meta { padding: 2px 16px 16px; }
     .gal-title { font-size: 14px; font-weight: 500; letter-spacing: -0.01em; }
@@ -1965,8 +1977,8 @@ export function AskCard() {
             render: mountCompareCard,
             thumb(el) {
               el.innerHTML = `
-                <div class="gal-float" style="--gal-w:190px;--gal-h:140px;--gal-s:.5">
-                <article class="cmp-enhance">
+                <div class="gal-float" style="--gal-w:380px;--gal-h:280px;--gal-s:.62">
+                <div class="gal-float-inner"><article class="cmp-enhance">
                   <div class="cmp-enhance-head"><div><h3>对照一下</h3><p>拖动看前后变化</p></div>
                   <button class="cmp-enhance-cta" type="button">开始试试</button></div>
                   <div class="cmp-split" style="--split:58%">
@@ -1974,7 +1986,7 @@ export function AskCard() {
                     <img class="cmp-split-after" src="${MOCK_AFTER}" alt="">
                     <span class="cmp-split-line"></span><span class="cmp-split-handle">↔</span>
                   </div>
-                </article></div>`;
+                </article></div></div>`;
             },
             animate() {
               if (typeof mountCompareCard.play === "function") mountCompareCard.play();
@@ -1989,14 +2001,14 @@ export function AskCard() {
             render: mountAskCard,
             thumb(el) {
               el.innerHTML = `
-                <div class="gal-float" style="--gal-w:140px;--gal-h:140px;--gal-s:.5">
-                <article class="cmp-ask">
+                <div class="gal-float" style="--gal-w:280px;--gal-h:280px;--gal-s:.62">
+                <div class="gal-float-inner"><article class="cmp-ask">
                   <div class="cmp-ask-idle">
                     <div class="cmp-ask-head"><div><h3>问一问</h3><p class="cmp-ask-sub">先看一条回答</p></div>
                     <span class="cmp-ask-go">→</span></div>
                     <div class="cmp-ask-answer"><i>▣</i><p>今天风不大，傍晚前都还亮。<span>备忘 · 5 月 12 日</span></p></div>
                   </div>
-                </article></div>`;
+                </article></div></div>`;
             },
             animate() {
               if (typeof mountAskCard.play === "function") mountAskCard.play();
